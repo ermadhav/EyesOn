@@ -1,39 +1,67 @@
+// ==== BACKEND (server/index.js) ====
+
 const express = require("express");
-const mongoose = require("mongoose");
+const http = require("http");
+const { Server } = require("socket.io");
 const cors = require("cors");
+const mongoose = require("mongoose");
 
 const app = express();
-const PORT = 5000;
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"]
+  }
+});
 
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect("mongodb://127.0.0.1:27017/userTracker", {
+// Mongoose Location Schema
+mongoose.connect("mongodb://localhost:27017/tracker", {
   useNewUrlParser: true,
-  useUnifiedTopology: true,
+  useUnifiedTopology: true
 });
 
-const userSchema = new mongoose.Schema({
+const LocationSchema = new mongoose.Schema({
   uid: String,
   latitude: Number,
   longitude: Number,
-  timestamp: { type: Date, default: Date.now },
+  timestamp: { type: Date, default: Date.now }
 });
 
-const UserData = mongoose.model("UserData", userSchema);
+const Location = mongoose.model("Location", LocationSchema);
 
 app.post("/api/location", async (req, res) => {
   const { uid, lat, lng } = req.body;
-  const data = new UserData({ uid, latitude: lat, longitude: lng });
-  await data.save();
-  res.json({ status: "success" });
+  await Location.create({ uid, latitude: lat, longitude: lng });
+  res.send({ status: "Location saved" });
 });
 
 app.get("/api/locations", async (req, res) => {
-  const all = await UserData.find().sort({ timestamp: -1 });
-  res.json(all);
+  const data = await Location.find().sort({ timestamp: -1 });
+  res.send(data);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+io.on("connection", (socket) => {
+  console.log("New socket connected: ", socket.id);
+
+  socket.on("join", (roomId) => {
+    socket.join(roomId);
+  });
+
+  socket.on("offer", (data) => {
+    socket.to(data.room).emit("offer", data.offer);
+  });
+
+  socket.on("answer", (data) => {
+    socket.to(data.room).emit("answer", data.answer);
+  });
+
+  socket.on("ice-candidate", (data) => {
+    socket.to(data.room).emit("ice-candidate", data.candidate);
+  });
 });
+
+server.listen(5000, () => console.log("Server running on port 5000"));
