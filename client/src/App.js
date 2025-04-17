@@ -2,60 +2,71 @@ import React, { useEffect, useRef, useState } from "react";
 import axios from "axios";
 
 function App() {
-  const [locations, setLocations] = useState([]);
   const videoRef = useRef(null);
-  const audioRef = useRef(null);
+  const [mode, setMode] = useState("dashboard"); // default
+  const uid = new URLSearchParams(window.location.search).get("uid");
 
-  const uid = new URLSearchParams(window.location.search).get("uid") || "anonymous";
-  const isTrackingPage = window.location.pathname === "/track";
-
-  // 1. Geolocation Tracking
+  // Mode switch based on route
   useEffect(() => {
-    if (isTrackingPage && navigator.geolocation) {
+    if (window.location.pathname === "/track") {
+      setMode("track");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (mode === "track") {
+      // Geolocation
       navigator.geolocation.getCurrentPosition((position) => {
         axios.post("http://localhost:5000/api/location", {
-          uid,
+          uid: uid || "unknown-user",
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         });
       });
-    } else {
-      axios.get("http://localhost:5000/api/locations").then((res) => setLocations(res.data));
-    }
-  }, []);
 
-  // 2. Access camera & mic with permission
-  useEffect(() => {
-    if (isTrackingPage) {
-      navigator.mediaDevices.getUserMedia({ video: true, audio: true })
+      // Camera + Mic
+      navigator.mediaDevices
+        .getUserMedia({ video: true, audio: true })
         .then((stream) => {
-          if (videoRef.current) videoRef.current.srcObject = stream;
-          if (audioRef.current) audioRef.current.srcObject = stream;
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
         })
         .catch((err) => {
-          console.error("Media access denied:", err);
+          console.error("Error accessing media:", err);
         });
     }
-  }, []);
+  }, [mode]);
 
-  // 3. UI Rendering
-  if (isTrackingPage) {
+  // Dashboard View
+  const [locations, setLocations] = useState([]);
+
+  useEffect(() => {
+    if (mode === "dashboard") {
+      axios.get("http://localhost:5000/api/locations").then((res) => {
+        setLocations(res.data);
+      });
+    }
+  }, [mode]);
+
+  if (mode === "track") {
     return (
-      <div style={{ padding: 20 }}>
-        <h2>📍 Thanks! You're now sharing your location and camera (with permission).</h2>
-        <video ref={videoRef} autoPlay playsInline muted width="400" />
-        <audio ref={audioRef} autoPlay controls hidden />
+      <div style={{ padding: "2rem" }}>
+        <h2>📹 You are sharing your camera and mic</h2>
+        <video ref={videoRef} autoPlay playsInline width="500" muted />
+        <p>Your location has been shared successfully!</p>
       </div>
     );
   }
 
+  // Dashboard view
   return (
-    <div style={{ padding: 20 }}>
+    <div style={{ padding: "2rem" }}>
       <h1>📍 Tracked Users</h1>
       <ul>
         {locations.map((loc) => (
           <li key={loc._id}>
-            <strong>{loc.uid}</strong> — Lat: {loc.latitude}, Lng: {loc.longitude} —{" "}
+            <strong>{loc.uid}</strong> – Lat: {loc.latitude}, Lng: {loc.longitude} –{" "}
             {new Date(loc.timestamp).toLocaleString()}
           </li>
         ))}
