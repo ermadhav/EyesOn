@@ -84,7 +84,17 @@ function App() {
               <p>
                 📍 {loc.latitude.toFixed(4)}, {loc.longitude.toFixed(4)}
               </p>
-              <small>🕒 {new Date(loc.timestamp).toLocaleString()}</small>
+              <small>
+                🕒{" "}
+                {new Date(loc.timestamp).toLocaleString("en-US", {
+                  hour: "numeric",
+                  minute: "2-digit",
+                  hour12: true,
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+                })}
+              </small>
             </div>
           ))}
       </div>
