@@ -76,11 +76,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { MapPin } from "lucide-react";
-import {
-  GoogleMap,
-  Marker,
-  useJsApiLoader,
-} from "@react-google-maps/api";
+import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
 
 const containerStyle = {
   width: "100%",
@@ -88,10 +84,7 @@ const containerStyle = {
   borderRadius: "12px",
 };
 
-const defaultCenter = {
-  lat: 20,
-  lng: 0,
-};
+const defaultCenter = { lat: 20, lng: 0 };
 
 function App() {
   const [mode, setMode] = useState("dashboard");
@@ -119,7 +112,7 @@ function App() {
         });
       });
     }
-  }, [mode]);
+  }, [mode]); // ⛔️ warning: uid used inside but not declared in deps
 
   useEffect(() => {
     if (mode === "dashboard") {
@@ -160,7 +153,9 @@ function App() {
               key={uid}
               className="bg-gray-900 rounded-2xl shadow-md p-4 transition-all hover:shadow-lg"
             >
-              <h2 className="text-lg font-semibold text-blue-300 mb-2">{uid}</h2>
+              <h2 className="text-lg font-semibold text-blue-300 mb-2">
+                {uid}
+              </h2>
 
               <GoogleMap
                 mapContainerStyle={containerStyle}
@@ -174,7 +169,8 @@ function App() {
               </GoogleMap>
 
               <p className="text-gray-400 text-sm mt-2">
-                📍 Lat: {loc.latitude.toFixed(4)}, Lng: {loc.longitude.toFixed(4)}
+                📍 Lat: {loc.latitude.toFixed(4)}, Lng:{" "}
+                {loc.longitude.toFixed(4)}
               </p>
               <p className="text-gray-500 text-xs mt-1">
                 🕒 {new Date(loc.timestamp).toLocaleString()}
