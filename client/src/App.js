@@ -2,11 +2,11 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { MapPin } from "lucide-react";
 import { GoogleMap, Marker, useJsApiLoader } from "@react-google-maps/api";
-import "./App.css"; // Import the custom CSS
+import "./App.css"; 
 
 const containerStyle = {
   width: "100%",
-  height: "160px", // smaller map
+  height: "160px", 
   borderRadius: "12px",
 };
 
